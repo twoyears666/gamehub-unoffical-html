@@ -26,7 +26,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .main-content { flex: 1; padding: 30px; padding-bottom: env(safe-area-inset-bottom); }
 
 /* --- 网格布局 --- */
-.grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: flex-start; }
+.grid { display: flex; flex-wrap: wrap; gap: 30px; justify-content: flex-start; position: relative; }
 
 /* --- 卡片样式 (超大正方形) --- */
 .card { width: 220px; aspect-ratio: 1 / 1; border-radius: 30px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-decoration: none; color: white; transition: transform 0.2s; position: relative; overflow: hidden; background-color: #1e1e1e; border: 1px solid #333; }
@@ -57,14 +57,56 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .modal-title { font-size: 1.5rem; margin-bottom: 10px; font-weight: bold; }
 .modal-desc { color: #999; font-size: 0.9rem; }
 
-/* --- 新增：展开菜单的样式 --- */
-/* 隐藏默认的details箭头 */
-.card[onclick=""]::-webkit-details-marker { display: none; }
-.card[onclick=""] > summary { list-style: none; outline: none; cursor: pointer; }
-/* 让展开的内容有滚动条 */
-.card-content ul { max-height: 300px; overflow-y: auto; padding: 0 10px; margin-top: 10px; text-align: left; }
-.card-content li { margin: 5px 0; padding: 5px 0; border-bottom: 1px solid #333; }
-.card-content h2 { margin: 10px 0 5px 0; font-size: 1rem; color: #aaa; }
+/* --- 新增：右侧展开菜单样式 --- */
+.dropdown-container {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+/* 菜单样式：修改为白色文字，无下划线 */
+.dropdown-menu {
+  display: none;
+  position: absolute;
+  left: 100%; /* 贴在卡片右侧 */
+  top: 0;
+  width: 320px;
+  background-color: #2a2a2a; /* 深灰色背景以突出白色文字 */
+  border-radius: 15px;
+  box-shadow: 5px 5px 20px rgba(0,0,0,0.5);
+  padding: 20px;
+  z-index: 10;
+  border: 1px solid #444;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+/* 链接样式：白色，无下划线，居左 */
+.dropdown-menu a {
+  color: #ffffff !important; /* 强制白色 */
+  text-decoration: none; /* 去除下划线 */
+  display: block;
+  padding: 12px 15px;
+  margin: 5px 0;
+  border-radius: 8px;
+  font-size: 0.95rem;
+  text-align: left;
+  transition: 0.2s;
+}
+
+/* 鼠标悬停效果 */
+.dropdown-menu a:hover {
+  background-color: #444;
+  color: #fff !important;
+}
+
+/* 二级标题样式 */
+.dropdown-menu h2 {
+  margin: 15px 0 10px 0;
+  color: #fff;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
 </style>
 </head>
 <body>
@@ -83,36 +125,27 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 <main class="main-content">
   <div class="grid" id="gameGrid">
 
-    <!-- 修改后的游戏库卡片：点击展开 -->
-    <details class="card">
-      <summary>
+    <!-- 修改后的游戏库卡片：点击右侧展开 -->
+    <div class="dropdown-container">
+      <!-- 卡片本身 -->
+      <div class="card" onclick="toggleDropdown(this)">
         <div class="card-bg" style="background-image: url('https://twoyears666.github.io/game/ios.png');"></div>
         <div class="card-overlay"></div>
         <div class="card-content">
           <div class="card-title">游戏库</div>
-          <div class="card-desc">点击展开列表</div>
+          <div class="card-desc">点击向右展开</div>
         </div>
-      </summary>
-      
-      <!-- 展开后的内容 -->
-      <div class="card-content">
-        <ul>
-          <li>
-            <a href="https://twoyears666.github.io/game/mc1.12.html" style="color:rgb(33, 141, 125)">1.12-can't change language-无汉化</a>
-          </li>
-          <li>
-            <a href="https://twoyears666.github.io/game/mc1.8.8.html" style="color:rgb(33, 141, 125)">1.8.8-can change language-有汉化</a>
-          </li>
-          <li>
-            <a href="https://twoyears666.github.io/game/mc1.5.2.html" style="color:rgb(33, 141, 125)">1.5.2-can't change language-无汉化</a>
-          </li>
-          <h2>其他</h2>
-          <li>
-            <a href="https://twoyears666.github.io/snowrider3D" style="color:rgb(33, 141, 125)">snowrider3D</a>
-          </li>
-        </ul>
       </div>
-    </details>
+
+      <!-- 展开后的内容 (向右) -->
+      <div class="dropdown-menu">
+        <a href="https://twoyears666.github.io/game/mc1.12.html">1.12-can't change language-无汉化</a>
+        <a href="https://twoyears666.github.io/game/mc1.8.8.html">1.8.8-can change language-有汉化</a>
+        <a href="https://twoyears666.github.io/game/mc1.5.2.html">1.5.2-can't change language-无汉化</a>
+        <h2>其他</h2>
+        <a href="https://twoyears666.github.io/snowrider3D">snowrider3D</a>
+      </div>
+    </div>
 
     <!-- 添加按钮 (保持不变) -->
     <div class="card add-card" onclick="addNewGame()">
@@ -171,8 +204,25 @@ function addNewGame() {
     </div> `;
   grid.insertBefore(newLink, grid.lastElementChild);
 }
+
+// 新增：控制下拉菜单显示隐藏的函数
+function toggleDropdown(cardElement) {
+  const menu = cardElement.parentElement.querySelector('.dropdown-menu');
+  // 隐藏所有其他菜单（可选，防止多个同时打开）
+  document.querySelectorAll('.dropdown-menu').forEach(m => {
+    if (m !== menu) m.style.display = 'none';
+  });
+  // 切换当前菜单
+  menu.style.display = menu.style.display === 'block' ? 'none' : 'block';
+}
+
+// 点击页面其他地方关闭菜单
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.dropdown-container')) {
+    document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
+  }
+});
 </script>
 
 </body>
 </html>
-
