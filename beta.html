@@ -33,14 +33,14 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 /* --- 关键修改：横向布局 --- */
 .grid { 
   display: flex; 
-  flex-wrap: nowrap; /* 强制不换行，横向排列 */
+  flex-wrap: nowrap; /* 强制不换行 */
   gap: 30px; 
   justify-content: flex-start; 
-  align-items: flex-start; /* 顶部对齐，防止展开后变形 */
-  width: max-content; /* 宽度由内容决定 */
+  align-items: center; /* 垂直居中 */
+  width: max-content; /* 宽度由内容撑开 */
 }
 
-/* --- 卡片样式 (超大正方形) --- */
+/* --- 卡片样式 --- */
 .card { 
   width: 220px; 
   aspect-ratio: 1 / 1; 
@@ -51,12 +51,13 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
   justify-content: center; 
   text-decoration: none; 
   color: white; 
-  transition: all 0.3s ease; /* 增加过渡效果 */
+  transition: transform 0.2s; 
   position: relative; 
-  overflow: visible; /* 允许子元素（菜单）溢出 */
+  overflow: hidden; 
   background-color: #1e1e1e; 
   border: 1px solid #333; 
-  flex-shrink: 0; /* 防止卡片被压缩 */
+  flex-shrink: 0; /* 防止被压缩 */
+  cursor: pointer;
 }
 .card:active { transform: scale(0.96); }
 
@@ -67,7 +68,7 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .card-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(to bottom, rgba(0,0,0,0.2), rgba(0,0,0,0.8)); z-index: 1; }
 
 /* --- 文字内容 --- */
-.card-content { position: relative; z-index: 2; text-align: center; width: 90%; }
+.card-content { position: relative; z-index: 2; text-align: center; width: 90%; pointer-events: none; }
 .card-title { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; text-shadow: 0 2px 4px rgba(0,0,0,0.8); }
 .card-desc { font-size: 0.9rem; color: #ddd; text-shadow: 0 1px 2px rgba(0,0,0,0.8); }
 
@@ -82,30 +83,19 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 .modal-title { font-size: 1.5rem; margin-bottom: 10px; font-weight: bold; }
 .modal-desc { color: #999; font-size: 0.9rem; }
 
-/* --- 右侧展开菜单样式 --- */
-.dropdown-container {
-  position: relative;
-  width: 100%;
-  height: 100%;
-  /* 关键：占据空间，把后面的元素挤开 */
-  flex-shrink: 0; 
-}
-
+/* --- 关键修改：菜单样式 --- */
+/* 菜单不再是 absolute 悬浮，而是 inline-block 实体，这样它会占据空间把后面的挤开 */
 .dropdown-menu {
-  display: none;
-  position: absolute;
-  left: 100%; /* 紧贴卡片右侧 */
-  top: 0;
+  display: none; /* 默认隐藏 */
   width: 320px;
-  height: 100%; /* 高度与卡片一致 */
+  height: 220px; /* 高度与卡片一致 */
   background-color: #2a2a2a;
   border-radius: 15px;
   border: 1px solid #444;
   padding: 20px;
-  z-index: 10;
-  margin-left: 20px; /* 与卡片保持一点间距 */
-  box-shadow: 5px 0 15px rgba(0,0,0,0.3);
   overflow-y: auto;
+  flex-shrink: 0; /* 防止被压缩 */
+  animation: fadeIn 0.3s ease;
 }
 
 /* 链接样式：白色，无下划线 */
@@ -132,10 +122,15 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
   font-weight: 600;
 }
 
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateX(-10px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 /* 响应式微调 */
 @media (max-width: 600px) { 
   .card { width: 180px; } 
-  .dropdown-menu { width: 260px; }
+  .dropdown-menu { width: 260px; height: 180px; }
 }
 </style>
 </head>
@@ -155,28 +150,26 @@ body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helve
 <main class="main-content">
   <div class="grid" id="gameGrid">
 
-    <!-- 游戏库卡片：横向布局中的第一个 -->
-    <div class="dropdown-container">
-      <div class="card" onclick="toggleDropdown(this)">
-        <div class="card-bg" style="background-image: url('https://twoyears666.github.io/game/ios.png');"></div>
-        <div class="card-overlay"></div>
-        <div class="card-content">
-          <div class="card-title">游戏库</div>
-          <div class="card-desc">点击展开列表</div>
-        </div>
-      </div>
-
-      <!-- 展开后的内容 (向右撑开空间) -->
-      <div class="dropdown-menu">
-        <a href="https://twoyears666.github.io/game/mc1.12.html">1.12-can't change language-无汉化</a>
-        <a href="https://twoyears666.github.io/game/mc1.8.8.html">1.8.8-can change language-有汉化</a>
-        <a href="https://twoyears666.github.io/game/mc1.5.2.html">1.5.2-can't change language-无汉化</a>
-        <h2>其他</h2>
-        <a href="https://twoyears666.github.io/snowrider3D">snowrider3D</a>
+    <!-- 游戏库卡片 -->
+    <div class="card" onclick="toggleDropdown(this)">
+      <div class="card-bg" style="background-image: url('https://twoyears666.github.io/game/ios.png');"></div>
+      <div class="card-overlay"></div>
+      <div class="card-content">
+        <div class="card-title">游戏库</div>
+        <div class="card-desc">点击展开列表</div>
       </div>
     </div>
 
-    <!-- 添加按钮：会被自动挤到右边 -->
+    <!-- 关键修改：菜单放在外面，作为独立的块，这样才会挤开后面的元素 -->
+    <div class="dropdown-menu">
+      <a href="https://twoyears666.github.io/game/mc1.12.html">1.12-can't change language-无汉化</a>
+      <a href="https://twoyears666.github.io/game/mc1.8.8.html">1.8.8-can change language-有汉化</a>
+      <a href="https://twoyears666.github.io/game/mc1.5.2.html">1.5.2-can't change language-无汉化</a>
+      <h2>其他</h2>
+      <a href="https://twoyears666.github.io/snowrider3D">snowrider3D</a>
+    </div>
+
+    <!-- 添加按钮：会被上面的菜单物理挤开 -->
     <div class="card add-card" onclick="addNewGame()">
       <div class="add-icon">+</div>
       <div class="add-text">添加游戏</div>
@@ -234,23 +227,18 @@ function addNewGame() {
   grid.insertBefore(newLink, grid.lastElementChild);
 }
 
-// 控制下拉菜单显示隐藏
+// 控制菜单显示隐藏
 function toggleDropdown(cardElement) {
-  const menu = cardElement.parentElement.querySelector('.dropdown-menu');
-  // 切换当前菜单
-  if (menu.style.display === 'block') {
+  const grid = document.getElementById('gameGrid');
+  const menu = grid.querySelector('.dropdown-menu');
+  
+  // 切换显示状态
+  if (menu.style.display === 'inline-block') {
     menu.style.display = 'none';
   } else {
-    menu.style.display = 'block';
+    menu.style.display = 'inline-block';
   }
 }
-
-// 点击页面其他地方关闭菜单
-document.addEventListener('click', function(e) {
-  if (!e.target.closest('.dropdown-container')) {
-    document.querySelectorAll('.dropdown-menu').forEach(m => m.style.display = 'none');
-  }
-});
 </script>
 
 </body>
