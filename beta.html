@@ -204,26 +204,37 @@ window.onclick = function(event) {
   if (event.target == modal) { modal.style.display = "none"; }
 }
 
+// 关键修改：添加游戏的逻辑，包含图片、链接、名字、描述
 function addNewGame() {
   const name = prompt("请输入游戏名称:");
   if (!name) return;
-  const url = prompt("请输入游戏跳转链接 (https://...):");
+  
+  const imgUrl = prompt("请输入图片链接 (https://...):");
+  if (!imgUrl) return;
+  
+  const url = prompt("请输入网页链接 (https://...):");
   if (!url) return;
-  let imgUrl = prompt("请输入图标链接 (https://...):");
-  if (!imgUrl) { imgUrl = "linear-gradient(135deg, #333, #111)"; }
+  
+  const desc = prompt("请输入描述:");
+  
   const grid = document.getElementById('gameGrid');
   const newLink = document.createElement('a');
   newLink.className = 'card';
   newLink.href = url;
   newLink.target = '_blank';
+  
+  // 设置背景图
   let bgStyle = imgUrl.startsWith('http') ? `background-image: url('${imgUrl}');` : `background: ${imgUrl};`;
+  
   newLink.innerHTML = ` 
     <div class="card-bg" style="${bgStyle}"></div> 
     <div class="card-overlay"></div> 
     <div class="card-content"> 
       <div class="card-title">${name}</div> 
-      <div class="card-desc">点击启动</div> 
+      <div class="card-desc">${desc || '点击启动'}</div> 
     </div> `;
+    
+  // 插入到添加按钮之前
   grid.insertBefore(newLink, grid.lastElementChild);
 }
 
