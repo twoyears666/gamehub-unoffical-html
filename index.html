@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>游戏库</title>
+    <style>
+        /* --- 基础重置 --- */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: #121212;
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+
+        /* --- 顶部导航栏 --- */
+        .top-bar {
+            display: flex;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #333;
+        }
+        .menu-icon { font-size: 24px; margin-right: 15px; cursor: pointer; }
+        .nav-item {
+            margin-right: 15px;
+            font-size: 14px;
+            font-weight: 500;
+            color: #aaa;
+            cursor: pointer;
+        }
+        .nav-item.active { color: #fff; }
+        .search-icon { margin-left: auto; font-size: 18px; color: #aaa; cursor: pointer; }
+
+        /* --- 游戏网格 --- */
+        .game-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+        }
+
+        /* --- 卡片样式 (使用 a 标签) --- */
+        .game-card {
+            display: block; /* a标签默认为inline，改为block */
+            width: 22%; /* 一行大约4个 */
+            aspect-ratio: 1 / 1; /* 强制正方形 */
+            background-color: #1e1e1e;
+            border-radius: 12px;
+            overflow: hidden;
+            position: relative;
+            text-decoration: none; /* 去掉下划线 */
+            transition: transform 0.2s;
+        }
+        .game-card:active { transform: scale(0.95); }
+
+        /* 卡片背景图 */
+        .card-bg {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        /* 卡片内容层 */
+        .card-content {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px;
+            z-index: 2;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+        }
+
+        .card-title { font-size: 18px; font-weight: bold; margin-bottom: 5px; display: block; }
+        .card-desc { font-size: 12px; color: #ddd; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+
+        /* --- 特殊的 Steam 卡片样式 --- */
+        .steam-card {
+            background: linear-gradient(135deg, #1b2838 0%, #2a475e 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        .steam-logo {
+            width: 50%;
+            height: auto;
+            fill: #c7d5e0; /* Steam 蓝灰色 */
+            margin-bottom: 10px;
+        }
+        .steam-text { font-family: "Motiva Sans", Arial, sans-serif; font-weight: bold; font-size: 20px; letter-spacing: 1px; color: #c7d5e0; }
+
+        /* --- 加号卡片 --- */
+        .add-card {
+            background-color: #1a1a1a;
+            border: 2px dashed #333;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+        }
+        .add-icon { font-size: 40px; color: #555; margin-bottom: 10px; }
+        .add-text { font-size: 14px; color: #555; }
+
+        /* --- 弹窗样式 --- */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #222;
+            padding: 25px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 400px;
+        }
+        .modal-title { font-size: 20px; margin-bottom: 20px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-size: 14px; color: #aaa; }
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            border: none;
+            border-radius: 6px;
+            color: #fff;
+            font-size: 14px;
+        }
+        .btn-group { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+        .btn { padding: 8px 16px; border-radius: 6px; font-size: 14px; cursor: pointer; border: none; }
+        .btn-cancel { background-color: #444; color: #fff; }
+        .btn-save { background-color: #007acc; color: #fff; }
+
+        /* 隐藏的文件输入 */
+        #bgInput { display: none; }
+    </style>
+</head>
+<body>
+
+    <!-- 顶部导航 -->
+    <div class="top-bar">
+        <div class="menu-icon">☰</div>
+        <div class="nav-item active">库</div>
+        <div class="nav-item">我的</div>
+        <div class="nav-item">好友</div>
+        <div class="nav-item">探索</div>
+        <div class="nav-item">找游戏</div>
+        <div class="search-icon">🔍</div>
+    </div>
+
+    <!-- 游戏网格 -->
+    <div class="game-grid" id="gameGrid">
+        <!-- Steam 卡片 (固定) -->
+        <a href="https://store.steampowered.com" class="game-card steam-card" target="_blank">
+            <!-- 使用SVG绘制Steam Logo，避免圈圈问题 -->
+            <svg class="steam-logo" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" stroke="currentColor" stroke-width="10" fill="none"/>
+                <circle cx="50" cy="50" r="20" stroke="currentColor" stroke-width="10" fill="none"/>
+                <line x1="50" y1="50" x2="85" y2="50" stroke="currentColor" stroke-width="10"/>
+                <circle cx="85" cy="50" r="10" fill="currentColor"/>
+            </svg>
+            <span class="steam-text">Steam</span>
+        </a>
+
+        <!-- 加号卡片 -->
+        <div class="game-card add-card" id="addBtn">
+            <div class="add-icon">+</div>
+            <div class="add-text">添加游戏</div>
+        </div>
+
+        <!-- JS 会在这里插入用户添加的卡片 -->
+    </div>
+
+    <!-- 添加游戏的弹窗 -->
+    <div class="modal" id="addModal">
+        <div class="modal-content">
+            <div class="modal-title">添加新游戏</div>
+            <div class="form-group">
+                <label>游戏名称</label>
+                <input type="text" id="inputTitle" placeholder="例如：赛博朋克 2077">
+            </div>
+            <div class="form-group">
+                <label>跳转链接</label>
+                <input type="text" id="inputUrl" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>简介描述</label>
+                <textarea id="inputDesc" rows="2" placeholder="简短介绍..."></textarea>
+            </div>
+            <div class="form-group">
+                <label>背景图片</label>
+                <input type="file" id="bgInput" accept="image/*">
+                <div style="font-size: 12px; color: #666; margin-top: 5px;" id="fileName">未选择图片</div>
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-cancel" id="cancelBtn">取消</button>
+                <button class="btn btn-save" id="saveBtn">保存</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const gameGrid = document.getElementById('gameGrid');
+        const addBtn = document.getElementById('addBtn');
+        const addModal = document.getElementById('addModal');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const saveBtn = document.getElementById('saveBtn');
+        const bgInput = document.getElementById('bgInput');
+        const fileNameDisplay = document.getElementById('fileName');
+
+        // 读取本地存储
+        let games = JSON.parse(localStorage.getItem('myGames')) || [];
+
+        // 渲染游戏列表
+        function renderGames() {
+            // 清除除了前两个（Steam和加号）之外的所有元素
+            // 注意：这里我们保留前两个，删除后面的，然后重新添加
+            const steamCard = document.querySelector('.steam-card');
+            const addButton = document.getElementById('addBtn');
+
+            // 移除所有旧的游戏卡片
+            document.querySelectorAll('.game-card.custom-game').forEach(el => el.remove());
+
+            // 重新插入游戏卡片 (在 Steam 之后，加号之前)
+            games.forEach((game, index) => {
+                const a = document.createElement('a');
+                a.href = game.url;
+                a.className = 'game-card custom-game';
+                a.target = "_blank"; // 新窗口打开
+
+                // 背景图
+                const img = document.createElement('img');
+                img.src = game.image;
+                img.className = 'card-bg';
+                a.appendChild(img);
+
+                // 内容
+                const content = document.createElement('div');
+                content.className = 'card-content';
+                content.innerHTML = `
+                    <span class="card-title">${game.title}</span>
+                    <span class="card-desc">${game.desc}</span>
+                `;
+                a.appendChild(content);
+
+                // 插入到加号按钮之前
+                gameGrid.insertBefore(a, addBtn);
+            });
+        }
+
+        // 打开弹窗
+        addBtn.addEventListener('click', () => {
+            addModal.style.display = 'flex';
+        });
+
+        // 关闭弹窗
+        cancelBtn.addEventListener('click', () => {
+            addModal.style.display = 'none';
+            // 重置表单
+            document.getElementById('inputTitle').value = '';
+            document.getElementById('inputUrl').value = '';
+            document.getElementById('inputDesc').value = '';
+            bgInput.value = '';
+            fileNameDisplay.textContent = '未选择图片';
+        });
+
+        // 显示文件名
+        bgInput.addEventListener('change', () => {
+            if(bgInput.files.length > 0) {
+                fileNameDisplay.textContent = bgInput.files[0].name;
+            }
+        });
+
+        // 保存新游戏
+        saveBtn.addEventListener('click', () => {
+            const title = document.getElementById('inputTitle').value;
+            const url = document.getElementById('inputUrl').value;
+            const desc = document.getElementById('inputDesc').value;
+            const file = bgInput.files[0];
+
+            if (!title || !url) {
+                alert('请填写名称和链接');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const newGame = {
+                    title: title,
+                    url: url,
+                    desc: desc,
+                    image: e.target.result // 图片转Base64
+                };
+                games.push(newGame);
+                localStorage.setItem('myGames', JSON.stringify(games));
+                renderGames();
+                cancelBtn.click(); // 关闭弹窗
+            };
+
+            // 如果没有选图，给个默认深色背景
+            if (!file) {
+                // 模拟一个空的深色图
+                reader.onload = function() {
+                     const newGame = {
+                        title: title,
+                        url: url,
+                        desc: desc,
+                        image: '#1a1a1a' // 纯黑背景
+                    };
+                    games.push(newGame);
+                    localStorage.setItem('myGames', JSON.stringify(games));
+                    renderGames();
+                    cancelBtn.click();
+                }
+                reader.readAsDataURL(new Blob([''], { type: 'text/plain' }));
+            } else {
+                reader.readAsDataURL(file);
+            }
+        });
+
+        // 初始化
+        renderGames();
+    </script>
+</body>
+</html>
