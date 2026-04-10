@@ -284,23 +284,7 @@
             grid.insertBefore(newLink, grid.lastElementChild);
         }
 
-        // PWA Manifest 注入
-        const manifest = {
-            "name": "带派游戏",
-            "short_name": "带派游戏",
-            "start_url": ".",
-            "display": "standalone",
-            "background_color": "#121212",
-            "theme_color": "#121212",
-            "icons": [
-                { "src": "icon.png", "sizes": "192x192", "type": "image/png" },
-                { "src": "icon.png", "sizes": "512x512", "type": "image/png" }
-            ]
-        };
-        const stringManifest = JSON.stringify(manifest);
-        const blob = new Blob([stringManifest], {type: 'application/json'});
-        const manifestURL = URL.createObjectURL(blob);
-        document.querySelector('#webManifest').setAttribute('href', manifestURL);
+        
     </script>
 </body>
 </html>
