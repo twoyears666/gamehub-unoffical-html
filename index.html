@@ -41,16 +41,27 @@
             z-index: 100;
         }
         .nav-left { font-size: 1.2rem; font-weight: 800; letter-spacing: 0.5px; }
-        .nav-right a {
+        
+        /* 导航栏按钮组 */
+        .nav-right {
+            display: flex;
+            gap: 15px; /* 按钮间距 */
+        }
+        .nav-right a, .nav-right .login-btn {
             color: #aaa;
             text-decoration: none;
             font-size: 0.9rem;
-            margin-left: 15px;
             padding: 6px 12px;
             border-radius: 8px;
             transition: all 0.2s;
+            cursor: pointer;
+            border: none;
+            background: transparent;
         }
-        .nav-right a:hover { background: #333; color: #fff; }
+        .nav-right a:hover, .nav-right .login-btn:hover { 
+            background: #333; 
+            color: #fff; 
+        }
 
         /* --- 主内容区 --- */
         .main-content {
@@ -63,15 +74,15 @@
         .grid {
             display: flex;
             flex-wrap: wrap;
-            gap: 30px; /* 间距 */
+            gap: 30px;
             justify-content: flex-start;
         }
 
         /* --- 卡片样式 (超大正方形) --- */
         .card {
-            width: 220px; /* 尺寸加大到 220px */
-            aspect-ratio: 1 / 1; /* 强制 1:1 正方形 */
-            border-radius: 30px; /* 大圆角 */
+            width: 220px;
+            aspect-ratio: 1 / 1;
+            border-radius: 30px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -81,7 +92,6 @@
             transition: transform 0.2s;
             position: relative;
             overflow: hidden;
-            /* 默认背景色，防止图片加载失败全白 */
             background-color: #1e1e1e; 
             border: 1px solid #333;
         }
@@ -94,13 +104,12 @@
             left: 0;
             width: 100%;
             height: 100%;
-            /* 关键：背景图覆盖整个卡片 */
             background-size: cover; 
             background-position: center;
             z-index: 0;
         }
 
-        /* --- 遮罩层 (让文字更清晰) --- */
+        /* --- 遮罩层 --- */
         .card-overlay {
             position: absolute;
             top: 0;
@@ -111,10 +120,10 @@
             z-index: 1;
         }
 
-        /* --- 文字内容 (在顶层) --- */
+        /* --- 文字内容 --- */
         .card-content {
             position: relative;
-            z-index: 2; /* 在遮罩层之上 */
+            z-index: 2;
             text-align: center;
             width: 90%;
         }
@@ -132,7 +141,38 @@
 
         /* --- 响应式微调 --- */
         @media (max-width: 500px) {
-            .card { width: 180px; } /* 手机端稍微小一点，但也很大 */
+            .card { width: 180px; }
+        }
+
+        /* --- 登录弹窗样式 --- */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #1e1e1e;
+            padding: 40px;
+            border-radius: 20px;
+            text-align: center;
+            max-width: 80%;
+            border: 1px solid #333;
+        }
+        .modal-title {
+            font-size: 1.5rem;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .modal-desc {
+            color: #999;
+            font-size: 0.9rem;
         }
     </style>
 </head>
@@ -144,6 +184,8 @@
         <div class="nav-right">
             <a href="#">主界面</a>
             <a href="https://github.com/twoyears666/gamehub-unoffical-html/tree/main" target="_blank">GitHub</a>
+            <!-- 新增登录按钮 -->
+            <button class="login-btn" onclick="handleLoginClick()">登录</button>
         </div>
     </nav>
 
@@ -152,11 +194,8 @@
         <div class="grid" id="gameGrid">
             <!-- 默认游戏库卡片 -->
             <a href="https://twoyears666.github.io/game" class="card">
-                <!-- 图片作为背景层 -->
                 <div class="card-bg" style="background-image: url('https://twoyears666.github.io/game/ios.png');"></div>
-                <!-- 遮罩层 -->
                 <div class="card-overlay"></div>
-                <!-- 文字层 -->
                 <div class="card-content">
                     <div class="card-title">游戏库</div>
                     <div class="card-desc">点击进入游戏库</div>
@@ -171,7 +210,47 @@
         </div>
     </main>
 
+    <!-- 登录弹窗 -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-title">Try again later</div>
+            <div class="modal-desc">请稍后再试</div>
+        </div>
+    </div>
+
     <script>
+        // 用于存储第一次点击的时间
+        let firstClickTime = null;
+
+        function handleLoginClick() {
+            const modal = document.getElementById('loginModal');
+            modal.style.display = 'flex'; // 显示弹窗
+
+            // 检查是否在10秒内有第一次点击
+            if (firstClick 10000) {
+                // 如果在10秒内再次点击，跳转到目标链接
+                window.location.href = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
+            } else {
+                // 否则记录当前时间，作为第一次点击
+                firstClickTime = new Date().getTime();
+                
+                // 设置一个定时器，10秒后重置点击状态
+                setTimeout(() => {
+                    if (firstClickTime === new Date().getTime() - 10000) {
+                        firstClickTime = null;
+                    }
+                }, 10000);
+            }
+        }
+
+        // 点击弹窗外区域关闭弹窗
+        window.onclick = function(event) {
+            const modal = document.getElementById('loginModal');
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+
         function addNewGame() {
             const name = prompt("请输入游戏名称:");
             if (!name) return;
@@ -180,7 +259,6 @@
             if (!url) return;
 
             let imgUrl = prompt("请输入图标链接 (https://...):");
-            // 如果没有输入图片，给一个默认深色背景
             if (!imgUrl) {
                 imgUrl = "linear-gradient(135deg, #333, #111)"; 
             }
@@ -191,7 +269,6 @@
             newLink.href = url;
             newLink.target = '_blank';
 
-            // 判断输入的是颜色还是图片链接（简单判断）
             let bgStyle = imgUrl.startsWith('http') 
                 ? `background-image: url('${imgUrl}');` 
                 : `background: ${imgUrl};`;
@@ -205,7 +282,6 @@
                 </div>
             `;
 
-            // 插入到“添加按钮”之前
             grid.insertBefore(newLink, grid.lastElementChild);
         }
 
